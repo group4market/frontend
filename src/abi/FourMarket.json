@@ -1,0 +1,109 @@
+[
+  { "type": "fallback", "stateMutability": "nonpayable" },
+  {
+    "type": "function",
+    "name": "createMarket",
+    "inputs": [
+      { "name": "_question", "type": "string", "internalType": "string" },
+      { "name": "_details", "type": "string", "internalType": "string" },
+      { "name": "_deadline", "type": "uint256", "internalType": "uint256" },
+      {
+        "name": "_resolutionTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      { "name": "_resolver", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [
+      { "name": "", "type": "address", "internalType": "contract Market" }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getDeployedMarket",
+    "inputs": [
+      { "name": "_marketId", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [
+      { "name": "", "type": "address", "internalType": "address" },
+      { "name": "", "type": "uint256", "internalType": "uint256" },
+      { "name": "", "type": "uint256", "internalType": "uint256" },
+      { "name": "", "type": "string", "internalType": "string" },
+      { "name": "", "type": "string", "internalType": "string" },
+      { "name": "", "type": "uint256", "internalType": "uint256" },
+      { "name": "", "type": "uint256", "internalType": "uint256" },
+      { "name": "", "type": "address", "internalType": "address" },
+      { "name": "", "type": "bool", "internalType": "bool" },
+      { "name": "", "type": "uint256", "internalType": "uint256" },
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "enum Market.outcomeType"
+      },
+      { "name": "", "type": "address", "internalType": "address" },
+      { "name": "", "type": "address", "internalType": "address" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "markets",
+    "inputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [
+      { "name": "", "type": "address", "internalType": "contract Market" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "s_nextMarketId",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "MarketCreated",
+    "inputs": [
+      {
+        "name": "marketId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "question",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      },
+      {
+        "name": "details",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      },
+      {
+        "name": "deadline",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "resolutionTime",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "resolver",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  { "type": "error", "name": "MarketIdDoesNotExist", "inputs": [] }
+]
