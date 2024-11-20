@@ -43,7 +43,7 @@ export const Popup = ({
   useEffect(() => {
     if (hash) {
       toast({
-        title: "Market Created",
+        title: "Tx Submitted",
         position: "top-right",
         description: (
           <Link href={"https://sepolia.etherscan.io/tx/" + hash} isExternal>
@@ -195,7 +195,9 @@ const BetPopup = ({ contract, writeContract }: any) => {
             <Text>Amount</Text>
             <NumberInput
               w={"full"}
-              onChange={(valueString) => setAmount(parseInt(valueString))}
+              precision={2}
+              step={0.2}
+              onChange={(valueString) => setAmount(parseFloat(valueString))}
               value={amount}
             >
               <NumberInputField />
@@ -213,7 +215,7 @@ const BetPopup = ({ contract, writeContract }: any) => {
                 w={"full"}
                 onClick={() => {
                   writeContract({
-                    address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+                    address: contract,
                     abi: Market,
                     functionName: "bet",
                     args: [i],

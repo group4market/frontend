@@ -8,7 +8,7 @@ export const Market = ({ i, market, onOpen }: any) => {
     <Tr key={i} fontSize={"sm"}>
       <Td borderBottomWidth={border}>{market[3]}</Td>
       <Td borderBottomWidth={border} isNumeric>
-        {formatNumber(Number(market[2]))}
+        {formatNumber(Number(market[2])/1e18)}
       </Td>
       <Td borderBottomWidth={border}>
         {new Date(Number(market[6])).toLocaleDateString()}
