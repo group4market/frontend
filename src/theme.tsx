@@ -28,7 +28,6 @@ const theme = extendTheme({
     body: `'Inter', sans-serif`,
   },
   components: {
-    
     Modal: {
       baseStyle: {
         dialog: {

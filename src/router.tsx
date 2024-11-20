@@ -34,12 +34,22 @@ const router = createBrowserRouter([
           let markets = [];
 
           for (let i = Number(marketIndex) - 1; i >= 0; i--) {
-            const market = await client.readContract({
+
+            const address = await client.readContract({
+              address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+              abi: FourMarket,
+              functionName: "markets",
+              args: [i],
+            });
+
+            const market: any = await client.readContract({
               address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
               abi: FourMarket,
               functionName: "getDeployedMarket",
               args: [i],
             });
+
+            market.push(address);
 
             markets.push(market);
           }

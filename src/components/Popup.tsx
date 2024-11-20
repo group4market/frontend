@@ -6,9 +6,6 @@ import {
   ModalBody,
   ModalCloseButton,
   Button,
-  Tabs,
-  TabPanels,
-  TabPanel,
   Box,
   HStack,
   Input,
@@ -21,30 +18,27 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   Link,
+  Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { useWriteContract } from "wagmi";
+import { useReadContract, useWriteContract } from "wagmi";
 import FourMarket from "../abi/FourMarket.json";
+import Market from "../abi/Market.json";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { parseEther } from "viem";
 
-const tablist = ["Create Market", "Withdraw", "Borrow", "Repay"];
-
-export const Popup = ({ isOpen, onClose }: { isOpen: any; onClose: any }) => {
+export const Popup = ({
+  isOpen,
+  onClose,
+  type,
+}: {
+  isOpen: any;
+  onClose: any;
+  type: "create" | string;
+}) => {
   const toast = useToast();
 
-  const [amount, setAmount] = useState<number>(0);
-
-  const [question, setQuestion] = useState<string>("");
-
-  const [info, setInfo] = useState<string>("");
-
-  const [deadline, setDeadline] = useState<number>(Date.now());
-
-  const [resolution, setResolution] = useState<number>(Date.now());
-
-  const [resolver, setResolver] = useState<string>("");
-
-  const { data: hash, isError, writeContract } = useWriteContract();
+  const { data: hash, isError, error, writeContract } = useWriteContract();
 
   useEffect(() => {
     if (hash) {
@@ -64,7 +58,7 @@ export const Popup = ({ isOpen, onClose }: { isOpen: any; onClose: any }) => {
       toast({
         title: "Error",
         position: "top-right",
-        description: "Error creating market",
+        description: error.message,
         status: "error",
         duration: 8000,
         isClosable: true,
@@ -73,93 +67,168 @@ export const Popup = ({ isOpen, onClose }: { isOpen: any; onClose: any }) => {
   }, [hash]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal isOpen={isOpen} size={"xl"} onClose={onClose} isCentered>
       <ModalOverlay />
-      <ModalContent w={"full"} m={{ base: 2, md: 0 }}>
-        <HStack w={"full"}>
-          <Tabs h={"100%"} w={"full"} orientation={"vertical"}>
-            <TabPanels w={"full"}>
-              {tablist.map((tab: string) => (
-                <TabPanel w={"full"} h={"100%"} key={tab}>
-                  <ModalHeader>{tab}</ModalHeader>
-                  <ModalCloseButton />
-                  <ModalBody w={"full"}>
-                    <VStack
-                      h={"xs"}
-                      w={"full"}
-                      justifyContent={"space-between"}
-                    >
-                      <Input
-                        type="text"
-                        placeholder="Question"
-                        onChange={(e: any) => setQuestion(e.target.value)}
-                      />
-                      <Textarea
-                        placeholder="Additional market info..."
-                        onChange={(e: any) => setInfo(e.target.value)}
-                      />
-                      <NumberInput
-                        w={"full"}
-                        onChange={(valueString) =>
-                          setDeadline(parseInt(valueString))
-                        }
-                        value={deadline}
-                      >
-                        <NumberInputField />
-                        <NumberInputStepper>
-                          <NumberIncrementStepper />
-                          <NumberDecrementStepper />
-                        </NumberInputStepper>
-                      </NumberInput>
-                      <NumberInput
-                        w={"full"}
-                        onChange={(valueString) =>
-                          setResolution(parseInt(valueString))
-                        }
-                        value={resolution}
-                      >
-                        <NumberInputField />
-                        <NumberInputStepper>
-                          <NumberIncrementStepper />
-                          <NumberDecrementStepper />
-                        </NumberInputStepper>
-                      </NumberInput>
-                      <Input
-                        type="text"
-                        placeholder="Resolver Address"
-                        onChange={(e: any) => setResolver(e.target.value)}
-                      />
-                      <Button
-                        w={"full"}
-                        onClick={() => {
-                          writeContract({
-                            address:
-                              "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
-                            abi: FourMarket,
-                            functionName: "createMarket",
-                            args: [
-                              question,
-                              info,
-                              BigInt(deadline),
-                              BigInt(resolution),
-                              resolver,
-                            ],
-                            value: BigInt(0),
-                          });
-                        }}
-                      >
-                        {tab}
-                      </Button>
-                    </VStack>
-                  </ModalBody>
-                </TabPanel>
-              ))}
-            </TabPanels>
-          </Tabs>
-          <Box flex={"1"} />
-        </HStack>
-      </ModalContent>
+      {type === "create" ? (
+        <CreatePopup writeContract={writeContract} />
+      ) : (
+        <BetPopup contract={type} writeContract={writeContract} />
+      )}
     </Modal>
+  );
+};
+
+const CreatePopup = ({ writeContract }: any) => {
+  const [question, setQuestion] = useState<string>("");
+
+  const [info, setInfo] = useState<string>("");
+
+  const [deadline, setDeadline] = useState<number>(Date.now());
+
+  const [resolution, setResolution] = useState<number>(Date.now());
+
+  const [resolver, setResolver] = useState<string>("");
+
+  return (
+    <ModalContent w={"full"} m={{ base: 2, md: 0 }}>
+      <ModalHeader>Create Market</ModalHeader>
+      <ModalCloseButton />
+      <ModalBody w={"full"}>
+        <VStack h={"xs"} w={"full"} justifyContent={"space-between"}>
+          <Input
+            type="text"
+            placeholder="Question"
+            onChange={(e: any) => setQuestion(e.target.value)}
+          />
+          <Textarea
+            placeholder="Additional market info..."
+            onChange={(e: any) => setInfo(e.target.value)}
+          />
+          <NumberInput
+            w={"full"}
+            onChange={(valueString) => setDeadline(parseInt(valueString))}
+            value={deadline}
+          >
+            <NumberInputField />
+            <NumberInputStepper>
+              <NumberIncrementStepper />
+              <NumberDecrementStepper />
+            </NumberInputStepper>
+          </NumberInput>
+          <NumberInput
+            w={"full"}
+            onChange={(valueString) => setResolution(parseInt(valueString))}
+            value={resolution}
+          >
+            <NumberInputField />
+            <NumberInputStepper>
+              <NumberIncrementStepper />
+              <NumberDecrementStepper />
+            </NumberInputStepper>
+          </NumberInput>
+          <Input
+            type="text"
+            placeholder="Resolver Address"
+            onChange={(e: any) => setResolver(e.target.value)}
+          />
+          <Button
+            w={"full"}
+            onClick={() => {
+              writeContract({
+                address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+                abi: FourMarket,
+                functionName: "createMarket",
+                args: [
+                  question,
+                  info,
+                  BigInt(deadline),
+                  BigInt(resolution),
+                  resolver,
+                ],
+                value: BigInt(0),
+              });
+            }}
+          >
+            Create Market
+          </Button>
+        </VStack>
+      </ModalBody>
+      <Box flex={"1"} />
+    </ModalContent>
+  );
+};
+
+const BetPopup = ({ contract, writeContract }: any) => {
+  const [amount, setAmount] = useState<number>(0);
+
+  const { data } = useReadContract({
+    address: contract,
+    abi: Market,
+    functionName: "getMarketDetails",
+  });
+
+  return (
+    <ModalContent w={"full"} m={{ base: 2, md: 0 }}>
+      <ModalHeader>Bet</ModalHeader>
+      <ModalCloseButton />
+      <ModalBody w={"full"}>
+        <VStack w={"full"} justifyContent={"flex-start"} spacing={4}>
+          <pre>
+            {JSON.stringify(
+              data,
+              (key, value) =>
+                typeof value === "bigint" ? Number(value) : value,
+              2
+            )}
+          </pre>
+          <HStack w={"full"} justifyContent={"space-between"}>
+            <Text>Market Address</Text>
+            <Link
+              href={"https://sepolia.etherscan.io/address/" + contract}
+              isExternal
+            >
+              {truncateAddress(contract)}
+              <ExternalLinkIcon mx="2px" />
+            </Link>
+          </HStack>
+          <HStack w={"full"}>
+            <Text>Amount</Text>
+            <NumberInput
+              w={"full"}
+              onChange={(valueString) => setAmount(parseInt(valueString))}
+              value={amount}
+            >
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+            <Text>ETH</Text>
+          </HStack>
+          <HStack w={"full"} justifyContent={"space-between"}>
+            {["Neither", "Yes", "No"].map((option, i) => (
+              <Button
+                key={i}
+                w={"full"}
+                onClick={() => {
+                  writeContract({
+                    address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+                    abi: Market,
+                    functionName: "bet",
+                    args: [i],
+                    value: parseEther(amount.toString()),
+                  });
+                }}
+              >
+                {option}
+              </Button>
+            ))}
+          </HStack>
+        </VStack>
+      </ModalBody>
+      <Box flex={"1"} />
+    </ModalContent>
   );
 };
 
@@ -179,4 +248,8 @@ export function formatNumber(num: number, precision = 2) {
   }
 
   return num.toFixed(precision);
+}
+
+function truncateAddress(address: string) {
+  return address.slice(0, 6) + "..." + address.slice(-6);
 }

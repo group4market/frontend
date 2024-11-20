@@ -26,6 +26,8 @@ export const App = () => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const [popup, setPopup] = useState("create");
+
   return (
     <Container
       maxW={"container.xl"}
@@ -36,7 +38,10 @@ export const App = () => {
     >
       <HStack py={10} w={"full"}>
         <Heading w={"100%"}>Markets</Heading>
-        <Button variant={"ghost"} onClick={onOpen}>
+        <Button variant={"ghost"} onClick={() => {
+          setPopup("create");
+          onOpen();
+        }}>
           Create Market
         </Button>
       </HStack>
@@ -73,7 +78,10 @@ export const App = () => {
                     <Market
                       key={i}
                       market={market}
-                      onOpen={onOpen}
+                      onOpen={() => {
+                        setPopup(market[market.length - 1]);
+                        onOpen()
+                      }}
                     />
                   ))}
                 </Tbody>
@@ -94,6 +102,7 @@ export const App = () => {
       <Popup
         onClose={onClose}
         isOpen={isOpen}
+        type={popup}
       />
     </Container>
   );
