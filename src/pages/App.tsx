@@ -20,13 +20,55 @@ import { useAccount, useReadContract } from "wagmi";
 import { Market } from "@/components/Market";
 import { Popup } from "@/components/Popup";
 import { useLoaderData } from "react-router-dom";
+import { client } from "../client";
+import FourMarket from "../abi/FourMarket.json";
+
 
 export const App = () => {
-  const data: any = useLoaderData();
+  const [data, setData] = useState<any>();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+
   const [popup, setPopup] = useState("create");
+
+  useEffect(() => {
+    (async () => {
+      const marketIndex = (await client.readContract({
+        address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+        abi: FourMarket,
+        functionName: "s_nextMarketId",
+      })) as number;
+
+      let markets = [];
+
+      for (let i = Number(marketIndex) - 1; i >= 0; i--) {
+
+        const address = await client.readContract({
+          address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+          abi: FourMarket,
+          functionName: "markets",
+          args: [i],
+        });
+
+        const market: any = await client.readContract({
+          address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+          abi: FourMarket,
+          functionName: "getDeployedMarket",
+          args: [i],
+        });
+
+        market.push(address);
+
+        markets.push(market);
+      }
+
+      setData(markets);
+    })()
+
+
+  }, []) 
+
 
   return (
     <Container
@@ -65,11 +107,10 @@ export const App = () => {
                 <Thead>
                   <Tr>
                     <Th>Question</Th>
-                    <Th isNumeric>Balance</Th>
+                    <Th isNumeric>TVL (ETH)</Th>
                     <Th>Resolution</Th>
                     <Th>Deadline</Th>
                     <Th>Status</Th>
-                    <Th>Resolver</Th>
                     <Th></Th>
                   </Tr>
                 </Thead>
@@ -92,6 +133,8 @@ export const App = () => {
               <Skeleton
                 variant="rectangular"
                 borderRadius={"md"}
+                startColor="transparent"
+                endColor="#333"
                 m={2}
                 h={20}
               />

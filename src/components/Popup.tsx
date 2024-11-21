@@ -90,9 +90,7 @@ const CreatePopup = ({ writeContract }: any) => {
 
   const [deadline, setDeadline] = useState<number>(Date.now());
 
-  const [resolution, setResolution] = useState<number>(24 * 60 * 60);
-
-  const [resolver, setResolver] = useState<string>("");
+  const [resolution, setResolution] = useState<number>(24 * 60 * 60 + 1);
 
   const { isConnected } = useAccount();
 
@@ -144,7 +142,7 @@ const CreatePopup = ({ writeContract }: any) => {
             <NumberInput
               onChange={(valueString) => setResolution(parseInt(valueString))}
               value={resolution}
-              min={86400}
+              min={86401}
             >
               <NumberInputField />
               <NumberInputStepper>
@@ -162,11 +160,6 @@ const CreatePopup = ({ writeContract }: any) => {
             </InputRightAddon>
           </InputGroup>
 
-          <Input
-            type="text"
-            placeholder="Resolver Address"
-            onChange={(e: any) => setResolver(e.target.value)}
-          />
           <Button
             w={"full"}
             onClick={() => {
@@ -176,9 +169,8 @@ const CreatePopup = ({ writeContract }: any) => {
                 console.log([
                   question,
                   info,
-                  BigInt(deadline),
+                  BigInt(deadline / 1000),
                   BigInt(resolution),
-                  resolver,
                 ])
 
                 writeContract({
@@ -186,11 +178,11 @@ const CreatePopup = ({ writeContract }: any) => {
                   abi: FourMarket,
                   functionName: "createMarket",
                   args: [
-                    question,
-                    info,
-                    BigInt(deadline / 1000),
-                    BigInt(resolution),
-                    resolver,
+                  question,
+                  info,
+                  BigInt(Math.round(deadline / 1000)),
+                  BigInt(Math.round(resolution)),
+                  "0x12aCeaD2db05eca2Af522b7789B5512F9B724ac7",
                   ],
                   value: BigInt(0),
                 });
