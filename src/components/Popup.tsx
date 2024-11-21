@@ -21,6 +21,7 @@ import {
   Text,
   InputGroup,
   InputLeftAddon,
+  InputRightAddon,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
@@ -88,7 +89,7 @@ const CreatePopup = ({ writeContract }: any) => {
 
   const [deadline, setDeadline] = useState<number>(Date.now());
 
-  const [resolution, setResolution] = useState<number>(Date.now());
+  const [resolution, setResolution] = useState<number>(24 * 60 * 60);
 
   const [resolver, setResolver] = useState<string>("");
 
@@ -107,27 +108,39 @@ const CreatePopup = ({ writeContract }: any) => {
             placeholder="Additional market info..."
             onChange={(e: any) => setInfo(e.target.value)}
           />
-          <InputGroup>
+            <InputGroup>
             <InputLeftAddon>Deadline</InputLeftAddon>
             <Input
               placeholder="Select Date and Time"
               size="md"
               type="datetime-local"
+              defaultValue={new Date().toISOString().slice(0, 16)}
               onChange={(e: any) =>
-                setDeadline(new Date(e.target.value).getTime())
+              setDeadline(new Date(e.target.value).getTime())
               }
             />
-          </InputGroup>
+            </InputGroup>
           <InputGroup>
             <InputLeftAddon>Resolution</InputLeftAddon>
-            <Input
-              placeholder="Select Date and Time"
-              size="md"
-              type="datetime-local"
-              onChange={(e: any) =>
-                setResolution(new Date(e.target.value).getTime())
-              }
-            />
+            <NumberInput
+              onChange={(valueString) => setResolution(parseInt(valueString))}
+              value={resolution}
+              min={86400}
+            >
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+            <InputRightAddon>
+              <Text>
+                ({Math.floor(resolution / (24 * 60 * 60))}D{" "}
+                {Math.floor((resolution % (24 * 60 * 60)) / (60 * 60))}Hrs{" "}
+                {Math.floor((resolution % (60 * 60)) / 60)}Mins{" "}
+                {resolution % 60}s)
+              </Text>
+            </InputRightAddon>
           </InputGroup>
 
           <Input
@@ -199,7 +212,6 @@ const BetPopup = ({ contract, writeContract }: any) => {
     functionName: "totalSupply",
   });
 
-
   return (
     <ModalContent w={"full"} m={{ base: 2, md: 0 }}>
       <ModalHeader>Bet</ModalHeader>
@@ -234,9 +246,29 @@ const BetPopup = ({ contract, writeContract }: any) => {
           </HStack>
 
           <HStack w={"full"} justifyContent={"space-between"}>
-            <Text>{Number(yesSupply?.data) / 1e18 } YES ({((Number(yesSupply?.data) / 1e18)/(Number(noSupply?.data) / 1e18 + Number(yesSupply?.data) / 1e18) * 100).toFixed(2)}%) </Text>
+            <Text>
+              {Number(yesSupply?.data) / 1e18} YES (
+              {(
+                (Number(yesSupply?.data) /
+                  1e18 /
+                  (Number(noSupply?.data) / 1e18 +
+                    Number(yesSupply?.data) / 1e18)) *
+                100
+              ).toFixed(2)}
+              %){" "}
+            </Text>
             <Text>/</Text>
-            <Text>{Number(noSupply?.data) / 1e18 } NO ({((Number(noSupply?.data) / 1e18)/(Number(noSupply?.data) / 1e18 + Number(yesSupply?.data) / 1e18) * 100).toFixed(2)}%)</Text>
+            <Text>
+              {Number(noSupply?.data) / 1e18} NO (
+              {(
+                (Number(noSupply?.data) /
+                  1e18 /
+                  (Number(noSupply?.data) / 1e18 +
+                    Number(yesSupply?.data) / 1e18)) *
+                100
+              ).toFixed(2)}
+              %)
+            </Text>
           </HStack>
           <HStack w={"full"}>
             <Text>Amount</Text>
