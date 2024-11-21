@@ -19,11 +19,14 @@ import {
   NumberDecrementStepper,
   Link,
   Text,
+  InputGroup,
+  InputLeftAddon,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import FourMarket from "../abi/FourMarket.json";
 import Market from "../abi/Market.json";
+import Token from "../abi/Token.json";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 import { parseEther } from "viem";
 
@@ -104,28 +107,29 @@ const CreatePopup = ({ writeContract }: any) => {
             placeholder="Additional market info..."
             onChange={(e: any) => setInfo(e.target.value)}
           />
-          <NumberInput
-            w={"full"}
-            onChange={(valueString) => setDeadline(parseInt(valueString))}
-            value={deadline}
-          >
-            <NumberInputField />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-          <NumberInput
-            w={"full"}
-            onChange={(valueString) => setResolution(parseInt(valueString))}
-            value={resolution}
-          >
-            <NumberInputField />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
+          <InputGroup>
+            <InputLeftAddon>Deadline</InputLeftAddon>
+            <Input
+              placeholder="Select Date and Time"
+              size="md"
+              type="datetime-local"
+              onChange={(e: any) =>
+                setDeadline(new Date(e.target.value).getTime())
+              }
+            />
+          </InputGroup>
+          <InputGroup>
+            <InputLeftAddon>Resolution</InputLeftAddon>
+            <Input
+              placeholder="Select Date and Time"
+              size="md"
+              type="datetime-local"
+              onChange={(e: any) =>
+                setResolution(new Date(e.target.value).getTime())
+              }
+            />
+          </InputGroup>
+
           <Input
             type="text"
             placeholder="Resolver Address"
@@ -159,13 +163,42 @@ const CreatePopup = ({ writeContract }: any) => {
 };
 
 const BetPopup = ({ contract, writeContract }: any) => {
+  const { address } = useAccount();
+
   const [amount, setAmount] = useState<number>(0);
 
-  const { data } = useReadContract({
+  const { data }: any = useReadContract({
     address: contract,
     abi: Market,
     functionName: "getMarketDetails",
   });
+
+  const yesBalance: any = useReadContract({
+    address: data?.[11] || "",
+    abi: Token,
+    functionName: "balanceOf",
+    args: [address],
+  });
+
+  const noBalance: any = useReadContract({
+    address: data?.[12] || "",
+    abi: Token,
+    functionName: "balanceOf",
+    args: [address],
+  });
+
+  const yesSupply: any = useReadContract({
+    address: data?.[11] || "",
+    abi: Token,
+    functionName: "totalSupply",
+  });
+
+  const noSupply: any = useReadContract({
+    address: data?.[12] || "",
+    abi: Token,
+    functionName: "totalSupply",
+  });
+
 
   return (
     <ModalContent w={"full"} m={{ base: 2, md: 0 }}>
@@ -191,6 +224,20 @@ const BetPopup = ({ contract, writeContract }: any) => {
               <ExternalLinkIcon mx="2px" />
             </Link>
           </HStack>
+          <HStack w={"full"} justifyContent={"space-between"}>
+            <Text>My Yes Balance</Text>
+            <Text>{Number(yesBalance?.data) / 1e18} YES</Text>
+          </HStack>
+          <HStack w={"full"} justifyContent={"space-between"}>
+            <Text>My No Balance</Text>
+            <Text>{Number(noBalance?.data) / 1e18} NO</Text>
+          </HStack>
+
+          <HStack w={"full"} justifyContent={"space-between"}>
+            <Text>{Number(yesSupply?.data) / 1e18 } YES ({((Number(yesSupply?.data) / 1e18)/(Number(noSupply?.data) / 1e18 + Number(yesSupply?.data) / 1e18) * 100).toFixed(2)}%) </Text>
+            <Text>/</Text>
+            <Text>{Number(noSupply?.data) / 1e18 } NO ({((Number(noSupply?.data) / 1e18)/(Number(noSupply?.data) / 1e18 + Number(yesSupply?.data) / 1e18) * 100).toFixed(2)}%)</Text>
+          </HStack>
           <HStack w={"full"}>
             <Text>Amount</Text>
             <NumberInput
@@ -209,7 +256,7 @@ const BetPopup = ({ contract, writeContract }: any) => {
             <Text>ETH</Text>
           </HStack>
           <HStack w={"full"} justifyContent={"space-between"}>
-            {["Neither", "Yes", "No"].map((option, i) => (
+            {["Yes", "No"].map((option, i) => (
               <Button
                 key={i}
                 w={"full"}
@@ -218,7 +265,7 @@ const BetPopup = ({ contract, writeContract }: any) => {
                     address: contract,
                     abi: Market,
                     functionName: "bet",
-                    args: [i],
+                    args: [i + 1],
                     value: parseEther(amount.toString()),
                   });
                 }}
