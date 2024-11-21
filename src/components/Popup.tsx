@@ -22,6 +22,7 @@ import {
   InputGroup,
   InputLeftAddon,
   InputRightAddon,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
@@ -108,20 +109,33 @@ const CreatePopup = ({ writeContract }: any) => {
             placeholder="Additional market info..."
             onChange={(e: any) => setInfo(e.target.value)}
           />
-            <InputGroup>
-            <InputLeftAddon>Deadline</InputLeftAddon>
+          <InputGroup>
+            <InputLeftAddon>
+              <Tooltip
+                label="This is the deadline for betters to place their bets"
+                aria-label="A tooltip"
+              >
+                Deadline ℹ️
+              </Tooltip>
+            </InputLeftAddon>
             <Input
               placeholder="Select Date and Time"
               size="md"
               type="datetime-local"
               defaultValue={new Date().toISOString().slice(0, 16)}
               onChange={(e: any) =>
-              setDeadline(new Date(e.target.value).getTime())
+                setDeadline(new Date(e.target.value).getTime())
               }
             />
-            </InputGroup>
+          </InputGroup>
           <InputGroup>
-            <InputLeftAddon>Resolution</InputLeftAddon>
+            <InputLeftAddon>
+            <Tooltip
+              label="This is the amount of time the resolver has to resolve the market"
+              aria-label="A tooltip"
+              >
+              Resolution ℹ️
+              </Tooltip></InputLeftAddon>
             <NumberInput
               onChange={(valueString) => setResolution(parseInt(valueString))}
               value={resolution}
