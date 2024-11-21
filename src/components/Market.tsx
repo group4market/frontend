@@ -1,10 +1,10 @@
 import { Button, Td, Tr } from "@chakra-ui/react";
 import { formatNumber } from "./Popup";
+import { useWriteContract } from "wagmi";
+import MarketABI from "../abi/Market.json";
 
 export const Market = ({ i, market, onOpen }: any) => {
   const border = i == length - 1 ? "0" : "1px";
-
-  console.log(market);
 
   return (
     <Tr key={i} fontSize={"sm"}>
@@ -49,8 +49,6 @@ const getTimeUntil = (date: Date) => {
 
   const now = new Date();
   
-  console.log(date.getTime(), now.getTime());
-
   const diff = date.getTime() - now.getTime();
 
   const diffAbs = Math.abs(diff);
@@ -58,5 +56,5 @@ const getTimeUntil = (date: Date) => {
   const hoursAgo = Math.floor((diffAbs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutesAgo = Math.floor((diffAbs % (1000 * 60 * 60)) / (1000 * 60));
 
-  return `${daysAgo}d ${hoursAgo}h ${minutesAgo}m ago`;
+  return `${daysAgo}d ${hoursAgo}h ${minutesAgo}m` + (diff < 0 ? " ago" : "");
 };

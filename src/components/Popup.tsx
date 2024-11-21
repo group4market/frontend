@@ -171,18 +171,18 @@ const CreatePopup = ({ writeContract }: any) => {
                   info,
                   BigInt(deadline / 1000),
                   BigInt(resolution),
-                ])
+                ]);
 
                 writeContract({
                   address: "0x1c6AbAaf5b8a410Ae89d30C84a0123173DaabfA3",
                   abi: FourMarket,
                   functionName: "createMarket",
                   args: [
-                  question,
-                  info,
-                  BigInt(Math.round(deadline / 1000)),
-                  BigInt(Math.round(resolution)),
-                  "0x12aCeaD2db05eca2Af522b7789B5512F9B724ac7",
+                    question,
+                    info,
+                    BigInt(Math.round(deadline / 1000)),
+                    BigInt(Math.round(resolution)),
+                    "0x12aCeaD2db05eca2Af522b7789B5512F9B724ac7",
                   ],
                   value: BigInt(0),
                 });
@@ -324,20 +324,60 @@ const BetPopup = ({ contract, writeContract }: any) => {
             </NumberInput>
             <Text>ETH</Text>
           </HStack>
-          <HStack w={"full"} justifyContent={"space-between"}>
-            {["Yes", "No"].map((option, i) => (
+          {!data?.[8] && (
+            <HStack w={"full"} justifyContent={"space-between"}>
+              {["Yes", "No"].map((option, i) => (
+                <Button
+                  key={i}
+                  w={"full"}
+                  onClick={() => {
+                    if (isConnected) {
+                      // Check if the wallet is connected
+                      writeContract({
+                        address: contract,
+                        abi: Market,
+                        functionName: "bet",
+                        args: [i + 1],
+                        value: parseEther(amount.toString()),
+                      });
+                    } else {
+                      // Handle the case when the wallet is not connected
+                      toast({
+                        title: "Wallet Not Connected",
+                        description: "Please connect your wallet first.",
+                        status: "warning",
+                        duration: 5000,
+                        isClosable: true,
+                        position: "top",
+                      });
+                    }
+                  }}
+                >
+                  {option}
+                </Button>
+              ))}
+            </HStack>
+          )}
+          {data?.[8] && (
+            <HStack w={"full"}>
               <Button
-                key={i}
                 w={"full"}
                 onClick={() => {
+                  // Check if the wallet is connected
                   if (isConnected) {
-                    // Check if the wallet is connected
+                    // approve the market contract to spend the token
+
                     writeContract({
-                      address: contract,
-                      abi: Market,
-                      functionName: "bet",
-                      args: [i + 1],
-                      value: parseEther(amount.toString()),
+                      address: data?.[11],
+                      abi: Token,
+                      functionName: "approve",
+                      args: [
+                        contract,
+                        BigInt(
+                          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                        ),
+                      ],
+                      value: BigInt(0),
                     });
                   } else {
                     // Handle the case when the wallet is not connected
@@ -352,10 +392,38 @@ const BetPopup = ({ contract, writeContract }: any) => {
                   }
                 }}
               >
-                {option}
+                1. Approve
               </Button>
-            ))}
-          </HStack>
+              <Button
+                w={"full"}
+                onClick={() => {
+                  // Check if the wallet is connected
+                  if (isConnected) {
+                    // approve the market contract to spend the token
+
+                    writeContract({
+                      address: contract,
+                      abi: Market,
+                      functionName: "distribute",
+                      value: BigInt(0),
+                    });
+                  } else {
+                    // Handle the case when the wallet is not connected
+                    toast({
+                      title: "Wallet Not Connected",
+                      description: "Please connect your wallet first.",
+                      status: "warning",
+                      duration: 5000,
+                      isClosable: true,
+                      position: "top",
+                    });
+                  }
+                }}
+              >
+                2. Claim
+              </Button>
+            </HStack>
+          )}
         </VStack>
       </ModalBody>
       <Box flex={"1"} />
