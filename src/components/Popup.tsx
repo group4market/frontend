@@ -172,14 +172,23 @@ const CreatePopup = ({ writeContract }: any) => {
             onClick={() => {
               if (isConnected) {
                 // Check if the wallet is connected
+
+                console.log([
+                  question,
+                  info,
+                  BigInt(deadline),
+                  BigInt(resolution),
+                  resolver,
+                ])
+
                 writeContract({
-                  address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+                  address: "0x1c6AbAaf5b8a410Ae89d30C84a0123173DaabfA3",
                   abi: FourMarket,
                   functionName: "createMarket",
                   args: [
                     question,
                     info,
-                    BigInt(deadline),
+                    BigInt(deadline / 1000),
                     BigInt(resolution),
                     resolver,
                   ],
