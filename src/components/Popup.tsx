@@ -94,6 +94,10 @@ const CreatePopup = ({ writeContract }: any) => {
 
   const [resolver, setResolver] = useState<string>("");
 
+  const { isConnected } = useAccount();
+
+  const toast = useToast();
+
   return (
     <ModalContent w={"full"} m={{ base: 2, md: 0 }}>
       <ModalHeader>Create Market</ModalHeader>
@@ -130,12 +134,13 @@ const CreatePopup = ({ writeContract }: any) => {
           </InputGroup>
           <InputGroup>
             <InputLeftAddon>
-            <Tooltip
-              label="This is the amount of time the resolver has to resolve the market"
-              aria-label="A tooltip"
+              <Tooltip
+                label="This is the amount of time the resolver has to resolve the market"
+                aria-label="A tooltip"
               >
-              Resolution ℹ️
-              </Tooltip></InputLeftAddon>
+                Resolution ℹ️
+              </Tooltip>
+            </InputLeftAddon>
             <NumberInput
               onChange={(valueString) => setResolution(parseInt(valueString))}
               value={resolution}
@@ -165,19 +170,32 @@ const CreatePopup = ({ writeContract }: any) => {
           <Button
             w={"full"}
             onClick={() => {
-              writeContract({
-                address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
-                abi: FourMarket,
-                functionName: "createMarket",
-                args: [
-                  question,
-                  info,
-                  BigInt(deadline),
-                  BigInt(resolution),
-                  resolver,
-                ],
-                value: BigInt(0),
-              });
+              if (isConnected) {
+                // Check if the wallet is connected
+                writeContract({
+                  address: "0x1c6abaaf5b8a410ae89d30c84a0123173daabfa3",
+                  abi: FourMarket,
+                  functionName: "createMarket",
+                  args: [
+                    question,
+                    info,
+                    BigInt(deadline),
+                    BigInt(resolution),
+                    resolver,
+                  ],
+                  value: BigInt(0),
+                });
+              } else {
+                // Handle the case when the wallet is not connected
+                toast({
+                  title: "Wallet Not Connected",
+                  position: "top",
+                  description: "Please connect your wallet first.",
+                  status: "warning",
+                  duration: 5000,
+                  isClosable: true,
+                });
+              }
             }}
           >
             Create Market
@@ -225,6 +243,10 @@ const BetPopup = ({ contract, writeContract }: any) => {
     abi: Token,
     functionName: "totalSupply",
   });
+
+  const { isConnected } = useAccount();
+
+  const toast = useToast();
 
   return (
     <ModalContent w={"full"} m={{ base: 2, md: 0 }}>
@@ -307,13 +329,26 @@ const BetPopup = ({ contract, writeContract }: any) => {
                 key={i}
                 w={"full"}
                 onClick={() => {
-                  writeContract({
-                    address: contract,
-                    abi: Market,
-                    functionName: "bet",
-                    args: [i + 1],
-                    value: parseEther(amount.toString()),
-                  });
+                  if (isConnected) {
+                    // Check if the wallet is connected
+                    writeContract({
+                      address: contract,
+                      abi: Market,
+                      functionName: "bet",
+                      args: [i + 1],
+                      value: parseEther(amount.toString()),
+                    });
+                  } else {
+                    // Handle the case when the wallet is not connected
+                    toast({
+                      title: "Wallet Not Connected",
+                      description: "Please connect your wallet first.",
+                      status: "warning",
+                      duration: 5000,
+                      isClosable: true,
+                      position: "top",
+                    });
+                  }
                 }}
               >
                 {option}
